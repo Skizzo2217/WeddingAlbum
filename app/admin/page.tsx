@@ -98,6 +98,7 @@ export default function AdminPage() {
                     ❌ Elimina
                 </button>
 
+
                 <button
                     className="delete-final-btn"
                     onClick={() => {
