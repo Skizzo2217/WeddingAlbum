@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
+import Image from "next/image";
 
 type Photo = {
   id: number;
@@ -14,13 +15,11 @@ export default function GalleryPage() {
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [selected, setSelected] = useState<Photo | null>(null);
 
-
   useEffect(() => {
     async function load() {
       const { data, error } = await supabase
         .from("photos")
         .select("*")
-        //.eq("approved", true)
         .order("created_at", { ascending: false });
 
       if (!error) setPhotos(data);
@@ -33,7 +32,6 @@ export default function GalleryPage() {
     <main className="gallery-container">
       <h1 className="gallery-title">Gallery</h1>
 
-      {/* TASTO SCARICA TUTTE */}
       <button
         className="download-all"
         onClick={() => {
@@ -43,7 +41,6 @@ export default function GalleryPage() {
         Scarica tutte 📥
       </button>
 
-      {/* GRID */}
       <div className="gallery-grid">
         {photos.map((photo) => (
           <div
@@ -52,18 +49,32 @@ export default function GalleryPage() {
             onClick={() => setSelected(photo)}
           >
             <div className="polaroid-inner">
-              <img src={photo.image_url} className="polaroid-img" />
+              <Image
+                src={photo.image_url}
+                alt={photo.uploader_name}
+                width={600}
+                height={800}
+                className="polaroid-img"
+                loading="lazy"
+                quality={85}
+              />
               <p className="polaroid-text">{photo.uploader_name}</p>
             </div>
           </div>
         ))}
       </div>
 
-      {/* MODAL */}
       {selected && (
         <div className="modal flash" onClick={() => setSelected(null)}>
           <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-            <img src={selected.image_url} className="modal-img" />
+            <Image
+              src={selected.image_url}
+              alt={selected.uploader_name}
+              width={1200}
+              height={1600}
+              className="modal-img"
+              quality={90}
+            />
             <p className="modal-name">{selected.uploader_name}</p>
 
             <button
