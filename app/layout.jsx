@@ -1,14 +1,23 @@
+import "./globals.css";
+
 export const metadata = {
-  title: "Wedding Album",
-  description: "Album fotografico del matrimonio",
-}
+  title: "Marco ❤️ Vanessa – Wedding 2026",
+  description: "Gallery fotografica del matrimonio",
+};
 
 export default function RootLayout({ children }) {
   return (
     <html lang="it">
-      <body className="bg-gray-100 text-gray-900">
+      <head>
+        <link
+          href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap"
+          rel="stylesheet"
+        />
+      </head>
+
+      <body className="wedding-layout">
         {children}
       </body>
     </html>
-  )
+  );
 }

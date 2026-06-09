@@ -45,7 +45,7 @@ export default function UploadForm() {
             approved: false
           }
         ]);
-
+    console.log("FILE:", file);
     console.log("INSERT ERROR:", insertError);
     console.log("INSERT DATA:", insertData);
 

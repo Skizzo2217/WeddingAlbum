@@ -2,27 +2,28 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="container">
+    <main className="home-wrapper">
 
-      <h1>Marco ❤️ Vanessa</h1>
+      <div className="gold-frame">
 
-      <p>
-        Benvenuti nel nostro album fotografico.
-      </p>
+        <h1 className="title">Marco ❤️ Vanessa</h1>
+        <p className="subtitle">12 Settembre 2026</p>
 
-      <Link
-        href="/upload"
-        className="button"
-      >
-        📸 Carica Foto
-      </Link>
+        <p className="intro">
+          Benvenuti nel nostro album fotografico.
+        </p>
 
-      <Link
-        href="/gallery"
-        className="button"
-      >
-        🖼️ Galleria
-      </Link>
+        <div className="buttons">
+          <Link href="/upload" className="home-btn primary">
+            📸 Carica Foto
+          </Link>
+
+          <Link href="/gallery" className="home-btn secondary">
+            🖼️ Galleria
+          </Link>
+        </div>
+
+      </div>
 
     </main>
   );
