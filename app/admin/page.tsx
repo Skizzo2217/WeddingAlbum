@@ -93,7 +93,7 @@ export default function AdminPage() {
 
                 <button
                     className="delete-btn"
-                    onClick={() => deletePhoto(photo.id, photo.image_url)}
+                    onClick={() => deletePhoto(photo.id)}
                 >
                     ❌ Elimina
                 </button>
