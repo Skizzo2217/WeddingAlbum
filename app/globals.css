@@ -177,3 +177,160 @@ body {
   cursor: pointer;
   font-weight: bold;
 }
+/* CONTAINER */
+.gallery-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.gallery-title {
+  text-align: center;
+  font-size: 32px;
+  margin-bottom: 20px;
+}
+
+/* DOWNLOAD ALL BUTTON */
+.download-all {
+  display: block;
+  margin: 0 auto 20px;
+  padding: 10px 20px;
+  background: #0070f3;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+/* GRID */
+.gallery-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+/* POLAROID CARD */
+.polaroid-card {
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.polaroid-card:hover {
+  transform: scale(1.03);
+}
+
+.polaroid-inner {
+  background: white;
+  padding: 10px 10px 25px;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  aspect-ratio: 3 / 4;
+}
+
+.polaroid-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.polaroid-text {
+  margin-top: 10px;
+  font-size: 18px;
+  font-family: 'Pacifico', cursive;
+  text-align: center;
+  color: #333;
+}
+
+/* ANIMAZIONE POLAROID CHE CADE */
+@keyframes fallIn {
+  0% {
+    opacity: 0;
+    transform: translateY(-40px) rotate(-5deg) scale(0.9);
+  }
+  60% {
+    opacity: 1;
+    transform: translateY(10px) rotate(2deg) scale(1.02);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg) scale(1);
+  }
+}
+
+.fall-in {
+  animation: fallIn 0.6s ease forwards;
+}
+
+/* MODAL */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 9999;
+}
+
+.modal-content {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  max-width: 90%;
+  text-align: center;
+}
+
+.modal-img {
+  width: 100%;
+  max-height: 70vh;
+  object-fit: contain;
+  border-radius: 8px;
+}
+
+.modal-name {
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* BUTTONS */
+.modal-download,
+.modal-close {
+  margin-top: 15px;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.modal-download {
+  background: #0070f3;
+  color: white;
+}
+
+.modal-close {
+  background: #ccc;
+}
+
+/* FLASH EFFECT */
+@keyframes flashEffect {
+  0% {
+    background: rgba(255,255,255,1);
+  }
+  100% {
+    background: rgba(0,0,0,0.85);
+  }
+}
+
+.flash {
+  animation: flashEffect 0.25s ease-out;
+}
