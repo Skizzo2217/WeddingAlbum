@@ -98,6 +98,7 @@ export default function UploadPage() {
 
   const pendingCount = files.filter(f => f.status === 'pending').length;
   const doneCount = files.filter(f => f.status === 'done').length;
+  const errorFiles = files.filter(f => f.status === 'error');
   const totalCount = files.length;
 
   return (
@@ -308,6 +309,16 @@ export default function UploadPage() {
                       transition={{ duration: 0.4 }}
                     />
                   </div>
+                </div>
+              )}
+
+              {errorFiles.length > 0 && (
+                <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                  {errorFiles.map(file => (
+                    <p key={file.id}>
+                      {file.file.name}: {file.error || 'Upload non riuscito'}
+                    </p>
+                  ))}
                 </div>
               )}
             </motion.div>

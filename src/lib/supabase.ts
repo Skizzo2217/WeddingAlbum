@@ -2,7 +2,7 @@ import { createClient } from '@supabase/supabase-js';
 
 const SUPABASE_URL = 'https://wdongpblggyyqgjeynbx.supabase.co';
 const SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_huBVnOr4TziP7QVS6_3z4Q_kqOO6ASK';
-const PHOTO_BUCKET = 'wedding-photos';
+const PHOTO_BUCKET = 'photos';
 
 export interface Photo {
   id: string;
@@ -45,7 +45,7 @@ function uniquePhotoPath(originalName?: string): string {
   const datePrefix = now.toISOString().slice(0, 10);
   const baseName = originalName ? slugify(originalName.replace(/\.[^.]+$/, '')) : 'foto';
   const random = crypto.randomUUID();
-  return `${datePrefix}/${Date.now()}-${random}-${baseName || 'foto'}.jpg`;
+  return `Upload/${datePrefix}-${Date.now()}-${random}-${baseName || 'foto'}.jpg`;
 }
 
 export async function compressImage(
