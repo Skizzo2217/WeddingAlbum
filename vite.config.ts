@@ -124,7 +124,6 @@ export default defineConfig(({ isSsrBuild }) => ({
 						format: "es",
 						entryFileNames: "server.bundle.mjs",
 						chunkFileNames: "bin/[name]-[hash].js",
-						banner: "import { createRequire } from 'module';\nconst require = createRequire(import.meta.url);",
 					},
 				},
 			}
