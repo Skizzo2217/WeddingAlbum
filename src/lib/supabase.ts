@@ -21,6 +21,14 @@ export interface UploadPhotoInput {
   originalName?: string;
 }
 
+interface PhotoRow {
+  id: number | string;
+  image_url: string;
+  uploader_name?: string | null;
+  created_at?: string | null;
+  approved?: boolean | null;
+}
+
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
     persistSession: false,
@@ -117,6 +125,16 @@ export async function uploadWeddingPhoto(input: UploadPhotoInput): Promise<Photo
   if (error) throw error;
 
   const publicUrl = publicPhotoUrl(path);
+  const { error: insertError } = await supabase.from('photos').insert([
+    {
+      image_url: publicUrl,
+      uploader_name: uploaderName ?? '',
+      approved: true,
+    },
+  ]);
+
+  if (insertError) throw insertError;
+
   return {
     id: path,
     path,
@@ -129,47 +147,26 @@ export async function uploadWeddingPhoto(input: UploadPhotoInput): Promise<Photo
 }
 
 export async function listWeddingPhotos(): Promise<Photo[]> {
-  const { data, error } = await supabase.storage
-    .from(PHOTO_BUCKET)
-    .list('', {
-      limit: 1000,
-      sortBy: { column: 'created_at', order: 'desc' },
-    });
+  const { data, error } = await supabase
+    .from('photos')
+    .select('id,image_url,uploader_name,created_at,approved')
+    .order('created_at', { ascending: false });
 
   if (error) throw error;
 
-  const folders = (data ?? []).filter((item) => item.id === null);
-  const photosByFolder = await Promise.all(
-    folders.map(async (folder) => {
-      const { data: nested, error: nestedError } = await supabase.storage
-        .from(PHOTO_BUCKET)
-        .list(folder.name, {
-          limit: 1000,
-          sortBy: { column: 'created_at', order: 'desc' },
-        });
-
-      if (nestedError) throw nestedError;
-      return (nested ?? []).map((item) => ({ ...item, name: `${folder.name}/${item.name}` }));
-    }),
-  );
-
-  return photosByFolder
-    .flat()
-    .filter((item) => item.name.toLowerCase().match(/\.(jpe?g|png|webp|heic|heif)$/))
-    .map((item) => {
-      const metadata = item.metadata as Record<string, string | undefined> | null;
-      const url = publicPhotoUrl(item.name);
+  return ((data ?? []) as PhotoRow[])
+    .filter((row) => row.approved !== false && Boolean(row.image_url))
+    .map((row) => {
       return {
-        id: item.id ?? item.name,
-        path: item.name,
-        url,
-        thumbnail_url: url,
-        uploader_name: metadata?.uploader_name || undefined,
-        created_at: item.created_at ?? new Date().toISOString(),
-        is_photobooth: metadata?.is_photobooth === 'true',
+        id: String(row.id),
+        path: row.image_url,
+        url: row.image_url,
+        thumbnail_url: row.image_url,
+        uploader_name: row.uploader_name || undefined,
+        created_at: row.created_at ?? new Date().toISOString(),
+        is_photobooth: false,
       };
-    })
-    .sort((a, b) => Date.parse(b.created_at) - Date.parse(a.created_at));
+    });
 }
 
 function publicPhotoUrl(path: string): string {
