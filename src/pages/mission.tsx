@@ -4,8 +4,9 @@ import { ImagePlus, X, CheckCircle, Upload, Sparkles, AlertCircle } from 'lucide
 import { useSearchParams } from 'react-router-dom';
 import BottomNav from '@/components/wedding/BottomNav';
 import { GoldCornerFrame, RoseWhite, GoldDivider } from '@/components/wedding/WeddingDecorations';
-import { uploadWeddingPhoto } from '@/lib/supabase';
+import { uploadWeddingPhoto } from '@/lib/photo-api';
 import { getMissionById } from '@/lib/missions';
+import Turnstile from '@/components/Turnstile';
 
 interface PreviewFile {
   id: string;
@@ -23,6 +24,8 @@ export default function MissionPage() {
   const [dragOver, setDragOver] = useState(false);
   const [allDone, setAllDone] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
+  const [uploadSession, setUploadSession] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [missionIdInput, setMissionIdInput] = useState(() => (searchParams.get('id') || '').replace(/\D/g, ''));
@@ -32,7 +35,9 @@ export default function MissionPage() {
   const missionError = normalizedMissionId && !mission ? 'Inserisci un numero di missione da 1 a 37.' : null;
 
   const addFiles = useCallback((newFiles: FileList | File[]) => {
-    const arr = Array.from(newFiles).filter(f => f.type.startsWith('image/'));
+    const arr = Array.from(newFiles)
+      .filter(f => f.type.startsWith('image/'))
+      .slice(0, Math.max(0, 10 - files.length));
     if (arr.length === 0) return;
     const previews: PreviewFile[] = arr.map(f => ({
       id: Math.random().toString(36).slice(2),
@@ -43,7 +48,7 @@ export default function MissionPage() {
     }));
     setFiles(prev => [...prev, ...previews]);
     setAllDone(false);
-  }, []);
+  }, [files.length]);
 
   const removeFile = (id: string) => {
     setFiles(prev => {
@@ -64,6 +69,8 @@ export default function MissionPage() {
     if (pending.length === 0) return;
     setIsUploading(true);
     let completedSuccessfully = true;
+    let activeSession = uploadSession || undefined;
+    let activeToken = turnstileToken || undefined;
 
     for (const file of pending) {
       setFiles(prev => prev.map(f =>
@@ -78,12 +85,17 @@ export default function MissionPage() {
           ));
         }
 
-        await uploadWeddingPhoto({
+        const response = await uploadWeddingPhoto({
           file: file.file,
           uploaderName,
           originalName: file.file.name,
           missionId: mission?.id,
+          turnstileToken: activeToken,
+          uploadSession: activeSession,
         });
+        activeSession = response.upload_session || activeSession;
+        activeToken = undefined;
+        setUploadSession(activeSession || null);
 
         setFiles(prev => prev.map(f =>
           f.id === file.id ? { ...f, status: 'done', progress: 100 } : f
@@ -107,6 +119,8 @@ export default function MissionPage() {
     setAllDone(false);
     setUploaderName('');
     setMissionIdInput('');
+    setTurnstileToken(null);
+    setUploadSession(null);
   };
 
   const pendingCount = files.filter(f => f.status === 'pending').length;
@@ -431,9 +445,13 @@ export default function MissionPage() {
 
         {/* Upload button */}
         {files.length > 0 && !allDone && (
+          <Turnstile onToken={setTurnstileToken} />
+        )}
+
+        {files.length > 0 && !allDone && (
           <motion.button
             onClick={uploadAll}
-            disabled={pendingCount === 0 || isUploading || Boolean(missionError)}
+            disabled={pendingCount === 0 || isUploading || Boolean(missionError) || (!turnstileToken && !uploadSession)}
             className="w-full py-4 rounded-2xl text-white font-bold text-lg flex items-center justify-center gap-3 disabled:opacity-50"
             style={{
               background: 'linear-gradient(135deg, #9a7e2e 0%, #C9A84C 40%, #E8D5A3 70%, #C9A84C 100%)',

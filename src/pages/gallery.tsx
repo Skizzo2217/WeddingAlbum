@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, ChevronLeft, ChevronRight, Download, RefreshCw, Archive } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Download, RefreshCw } from 'lucide-react';
 import BottomNav from '@/components/wedding/BottomNav';
 import { GoldCornerFrame, RoseWhite } from '@/components/wedding/WeddingDecorations';
-import { listWeddingPhotos, type Photo } from '@/lib/supabase';
+import { listWeddingPhotos, type Photo } from '@/lib/photo-api';
 import { getMissionById } from '@/lib/missions';
 
 type GallerySection = 'memories' | 'missions';
@@ -167,7 +167,6 @@ export default function GalleryPage() {
   const [loading, setLoading] = useState(true);
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
   const [refreshing, setRefreshing] = useState(false);
-  const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [section, setSection] = useState<GallerySection>('memories');
 
@@ -200,41 +199,6 @@ export default function GalleryPage() {
   const selectSection = (nextSection: GallerySection) => {
     setSection(nextSection);
     setLightboxIndex(null);
-  };
-
-  const downloadAll = async () => {
-    if (downloading) return;
-    setDownloading(true);
-    try {
-      // Dynamic import to keep bundle small
-      const JSZip = (await import('jszip')).default;
-      const zip = new JSZip();
-      const folder = zip.folder('marco-vanessa-matrimonio');
-
-      await Promise.all(
-        visiblePhotos.map(async (photo, i) => {
-          try {
-            const res = await fetch(photo.url);
-            const blob = await res.blob();
-            folder?.file(`foto-${String(i + 1).padStart(3, '0')}.jpg`, blob);
-          } catch { /* skip failed */ }
-        })
-      );
-
-      const content = await zip.generateAsync({ type: 'blob' });
-      const url = URL.createObjectURL(content);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = section === 'missions'
-        ? 'marco-vanessa-missioni.zip'
-        : 'marco-vanessa-ricordi.zip';
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch {
-      alert('Errore nel download. Riprova.');
-    } finally {
-      setDownloading(false);
-    }
   };
 
   return (
@@ -331,25 +295,6 @@ export default function GalleryPage() {
           <MasonryGrid photos={visiblePhotos} onPhotoClick={setLightboxIndex} />
         )}
       </div>
-
-      {/* Download all FAB */}
-      {visiblePhotos.length > 0 && !loading && (
-        <div className="fixed bottom-20 left-0 right-0 flex justify-center px-4 pointer-events-none z-40">
-          <motion.button
-            onClick={downloadAll}
-            disabled={downloading}
-            className="pointer-events-auto flex items-center gap-2 px-6 py-3.5 rounded-full text-white text-sm font-semibold shadow-xl disabled:opacity-60"
-            style={{ background: 'linear-gradient(135deg, #9a7e2e, #C9A84C)', boxShadow: '0 6px 24px rgba(201,168,76,0.45)', fontFamily: 'Lato, sans-serif' }}
-            initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.8 }}
-            whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}>
-            {downloading ? (
-              <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Preparazione ZIP...</>
-            ) : (
-              <><Archive size={16} /> Scarica {section === 'missions' ? 'Missioni' : 'Ricordi'} ({visiblePhotos.length})</>
-            )}
-          </motion.button>
-        </div>
-      )}
 
       {/* Lightbox */}
       <AnimatePresence>

@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Camera, RotateCcw, CheckCircle, Heart } from 'lucide-react';
 import BottomNav from '@/components/wedding/BottomNav';
 import { GoldCornerFrame, RoseWhite } from '@/components/wedding/WeddingDecorations';
-import { uploadWeddingPhoto } from '@/lib/supabase';
+import { uploadWeddingPhoto } from '@/lib/photo-api';
+import Turnstile from '@/components/Turnstile';
 
 // ─── Glasses definitions ────────────────────────────────────────────────────
 const GLASSES = [
@@ -89,6 +90,7 @@ export default function PhotoboothPage() {
   const [cameraError, setCameraError] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [cameraReady, setCameraReady] = useState(false);
+  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
 
   const startCamera = useCallback(async () => {
@@ -145,6 +147,7 @@ export default function PhotoboothPage() {
   const retake = () => {
     setCapturedImage(null);
     setUploadError(null);
+    setTurnstileToken(null);
     setStage('camera');
     startCamera();
   };
@@ -160,6 +163,7 @@ export default function PhotoboothPage() {
         file: blob,
         isPhotobooth: true,
         originalName: 'photobooth.jpg',
+        turnstileToken: turnstileToken ?? undefined,
       });
       setStage('success');
     } catch (error) {
@@ -340,6 +344,7 @@ export default function PhotoboothPage() {
               {uploadError && (
                 <p className="text-center text-sm text-red-600 px-3">{uploadError}</p>
               )}
+              <Turnstile onToken={setTurnstileToken} />
               <div className="flex gap-3">
                 <motion.button onClick={retake}
                   className="flex-1 py-4 rounded-2xl font-semibold flex items-center justify-center gap-2"
@@ -347,8 +352,8 @@ export default function PhotoboothPage() {
                   whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
                   <RotateCcw size={18} /> Riprova
                 </motion.button>
-                <motion.button onClick={uploadPhoto}
-                  className="flex-1 py-4 rounded-2xl text-white font-semibold flex items-center justify-center gap-2"
+                <motion.button onClick={uploadPhoto} disabled={!turnstileToken}
+                  className="flex-1 py-4 rounded-2xl text-white font-semibold flex items-center justify-center gap-2 disabled:opacity-40"
                   style={{ background: 'linear-gradient(135deg, #C9A84C, #E8D5A3, #C9A84C)', fontFamily: 'Lato, sans-serif', boxShadow: '0 4px 16px rgba(201,168,76,0.35)' }}
                   whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.97 }}>
                   <Heart size={18} /> Carica
