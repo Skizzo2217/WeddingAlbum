@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'motion/react';
-import { Camera, Images, Upload } from 'lucide-react';
+import { Camera, Images, Upload, ClipboardCheck } from 'lucide-react';
 import BottomNav from '@/components/wedding/BottomNav';
-import { RoseWhite, Gypsophila, MonogramFrame } from '@/components/wedding/WeddingDecorations';
+import { RoseWhite, /* Gypsophila, */ MonogramFrame, Rose } from '@/components/wedding/WeddingDecorations';
 
 // Falling petals animation
 interface Petal {
@@ -17,12 +17,12 @@ interface Petal {
 
 function FallingPetals() {
   const [petals] = useState<Petal[]>(() =>
-    Array.from({ length: 18 }, (_, i) => ({
+    Array.from({ length: 24 }, (_, i) => ({
       id: i,
       x: Math.random() * 100,
       delay: Math.random() * 8,
       duration: 6 + Math.random() * 6,
-      size: 8 + Math.random() * 10,
+      size: 10 + Math.random() * 12,
       rotation: Math.random() * 360,
     }))
   );
@@ -38,12 +38,14 @@ function FallingPetals() {
             top: -20,
             width: petal.size,
             height: petal.size * 1.3,
+            //filter: 'drop-shadow(0 1px 2px rgba(157, 108, 119, 0.18))',
+            filter: 'drop-shadow(0 1px 2px rgba(157, 108, 119, 0.18))',
           }}
           animate={{
             y: ['0vh', '110vh'],
             x: [0, Math.sin(petal.id) * 40],
             rotate: [petal.rotation, petal.rotation + 180],
-            opacity: [0, 0.7, 0.7, 0],
+            opacity: [0, 0.88, 0.88, 0],
           }}
           transition={{
             duration: petal.duration,
@@ -53,7 +55,10 @@ function FallingPetals() {
           }}
         >
           <svg viewBox="0 0 12 16" fill="none" width="100%" height="100%">
-            <ellipse cx="6" cy="8" rx="4" ry="7" fill="white" opacity="0.75" transform="rotate(15 6 8)"/>
+            <ellipse cx="6" cy="8" rx="4" ry="7"
+              fill={petal.id % 3 === 0 ? '#C9A84C' : '#FFF9F3'}
+              stroke="#D9B867" strokeWidth="0.45" opacity="0.95"
+              transform="rotate(15 6 8)"/>
           </svg>
         </motion.div>
       ))}
@@ -69,26 +74,29 @@ export default function HomePage() {
       <FallingPetals />
 
       {/* Decorative flowers top-left */}
-      <div className="absolute top-0 left-0 opacity-40 pointer-events-none -translate-x-4 -translate-y-4">
-        <RoseWhite size={80} />
+      <div className="absolute top-0 left-0 opacity-70 pointer-events-none -translate-x-3 -translate-y-3"
+        style={{ filter: 'drop-shadow(0 3px 5px rgba(126, 92, 52, 0.14))' }}>
+        <Rose size={108} />
       </div>
       {/* Decorative flowers top-right */}
-      <div className="absolute top-0 right-0 opacity-40 pointer-events-none translate-x-4 -translate-y-4">
-        <RoseWhite size={80} />
+      <div className="absolute top-0 right-0 opacity-70 pointer-events-none translate-x-3 -translate-y-3"
+        style={{ filter: 'drop-shadow(0 3px 5px rgba(126, 92, 52, 0.14))' }}>
+        <Rose size={108} />
       </div>
 
       {/* Main content */}
       <div className="relative z-10 flex flex-col items-center justify-center flex-1 px-6 pt-12 pb-4">
 
-        {/* Gypsophila top */}
+        {/* Gypsophila top — temporarily disabled
         <motion.div
-          className="mb-2 opacity-60"
+          className="mb-2 opacity-85"
           initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 0.6, y: 0 }}
+          animate={{ opacity: 0.85, y: 0 }}
           transition={{ duration: 1, delay: 0.2 }}
         >
           <Gypsophila />
         </motion.div>
+        */}
 
         {/* Monogram with frame */}
         <motion.div
@@ -153,15 +161,16 @@ export default function HomePage() {
           Condividi i tuoi ricordi con noi
         </motion.p>
 
-        {/* Gypsophila divider */}
+        {/* Gypsophila divider — temporarily disabled
         <motion.div
-          className="mb-6 opacity-50"
+          className="mb-6 opacity-75"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.5 }}
+          animate={{ opacity: 0.75 }}
           transition={{ delay: 0.9 }}
         >
           <Gypsophila />
         </motion.div>
+        */}
 
         {/* Action buttons */}
         <motion.div
@@ -170,8 +179,8 @@ export default function HomePage() {
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6, delay: 1.0 }}
         >
-          {/* Photobooth button */}
-          <Link to="/photobooth" className="block">
+          {/* Gallery button */}
+          <Link to="/gallery" className="block">
             <motion.div
               className="w-full py-4 px-6 rounded-2xl flex items-center gap-4 text-white"
               style={{
@@ -184,21 +193,21 @@ export default function HomePage() {
             >
               <div className="w-10 h-10 rounded-full flex items-center justify-center"
                 style={{ background: 'rgba(255,255,255,0.25)' }}>
-                <Camera size={20} />
+                <Images size={20} />
               </div>
               <div className="flex-1">
-                <p className="font-bold text-base leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
-                  Photobooth
+                <p className="font-bold text-base leading-tight" style={{ fontFamily: 'Playfair Display, serif'}}>
+                  Album Foto
                 </p>
-                <p className="text-xs opacity-80" style={{ fontFamily: 'Lato, sans-serif' }}>
-                  Scatta con gli occhiali divertenti
+                <p className="text-xs" style={{ fontFamily: 'Lato, sans-serif' }}>
+                  Sfoglia i ricordi condivisi
                 </p>
               </div>
             </motion.div>
           </Link>
 
-          {/* Gallery button */}
-          <Link to="/gallery" className="block">
+          {/* Photobooth button */}
+          <Link to="/photobooth" className="block">
             <motion.div
               className="w-full py-4 px-6 rounded-2xl flex items-center gap-4"
               style={{
@@ -212,14 +221,14 @@ export default function HomePage() {
             >
               <div className="w-10 h-10 rounded-full flex items-center justify-center"
                 style={{ background: 'rgba(201,168,76,0.12)' }}>
-                <Images size={20} style={{ color: '#C9A84C' }} />
+                <Camera size={20}  style={{ color: '#C9A84C' }}/>
               </div>
               <div className="flex-1">
-                <p className="font-bold text-base leading-tight" style={{ fontFamily: 'Playfair Display, serif', color: '#3D2B1F' }}>
-                  Album Foto
+                <p className="font-bold text-base leading-tight" style={{ fontFamily: 'Playfair Display, serif', color: '#7A6652'  }}>
+                  Photobooth
                 </p>
-                <p className="text-xs" style={{ fontFamily: 'Lato, sans-serif', color: '#7A6652' }}>
-                  Sfoglia i ricordi condivisi
+                <p className="text-xs opacity-80" style={{ fontFamily: 'Lato, sans-serif' }}>
+                  Scatta con gli occhiali divertenti
                 </p>
               </div>
             </motion.div>
@@ -252,13 +261,41 @@ export default function HomePage() {
               </div>
             </motion.div>
           </Link>
+
+          {/* Mission button */}
+          <Link to="/mission" className="block">
+            <motion.div
+              className="w-full py-4 px-6 rounded-2xl flex items-center gap-4"
+              style={{
+                background: 'white',
+                border: '1.5px solid #DFC98A',
+                boxShadow: '0 2px 8px rgba(201,168,76,0.1)',
+              }}
+              whileHover={{ scale: 1.03, boxShadow: '0 4px 16px rgba(201,168,76,0.2)' }}
+              whileTap={{ scale: 0.97 }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="w-10 h-10 rounded-full flex items-center justify-center"
+                style={{ background: 'rgba(201,168,76,0.08)' }}>
+                <ClipboardCheck size={20} style={{ color: '#C9A84C' }} />
+              </div>
+              <div className="flex-1">
+                <p className="font-bold text-base leading-tight" style={{ fontFamily: 'Playfair Display, serif', color: '#3D2B1F' }}>
+                  Missioni fotografiche
+                </p>
+                <p className="text-xs" style={{ fontFamily: 'Lato, sans-serif', color: '#7A6652' }}>
+                  Inserisci il numero sul biglietto e completa la sfida
+                </p>
+              </div>
+            </motion.div>
+          </Link>
         </motion.div>
 
         {/* Bottom roses */}
         <motion.div
-          className="flex gap-4 mt-6 opacity-30"
+          className="flex gap-4 mt-6 opacity-60"
           initial={{ opacity: 0 }}
-          animate={{ opacity: 0.3 }}
+          animate={{ opacity: 0.6 }}
           transition={{ delay: 1.2 }}
         >
           <RoseWhite size={32} />

@@ -4,6 +4,9 @@ import { X, ChevronLeft, ChevronRight, Download, RefreshCw, Archive } from 'luci
 import BottomNav from '@/components/wedding/BottomNav';
 import { GoldCornerFrame, RoseWhite } from '@/components/wedding/WeddingDecorations';
 import { listWeddingPhotos, type Photo } from '@/lib/supabase';
+import { getMissionById } from '@/lib/missions';
+
+type GallerySection = 'memories' | 'missions';
 
 // ─── Masonry column layout ───────────────────────────────────────────────────
 function MasonryGrid({ photos, onPhotoClick }: { photos: Photo[]; onPhotoClick: (i: number) => void }) {
@@ -29,6 +32,12 @@ function MasonryGrid({ photos, onPhotoClick }: { photos: Photo[]; onPhotoClick: 
         loading="lazy"
         style={{ display: 'block' }}
       />
+      {photo.mission_id && (
+        <span className="absolute top-2 left-2 px-2 py-1 rounded-full text-[10px] font-semibold text-white"
+          style={{ background: 'rgba(61,43,31,0.75)' }}>
+          Missione {photo.mission_id}
+        </span>
+      )}
       {/* Hover overlay */}
       <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-end"
         style={{ background: 'linear-gradient(to top, rgba(61,43,31,0.65), transparent)' }}>
@@ -66,6 +75,7 @@ function Lightbox({ photos, index, onClose, onPrev, onNext }: {
   onNext: () => void;
 }) {
   const photo = photos[index];
+  const mission = photo.mission_id ? getMissionById(photo.mission_id) : undefined;
 
   const downloadSingle = () => {
     const a = document.createElement('a');
@@ -137,6 +147,7 @@ function Lightbox({ photos, index, onClose, onPrev, onNext }: {
           <div>
             <p className="text-white/80 text-sm font-medium">{photo.uploader_name || 'Ospite'}</p>
             {photo.is_photobooth && <p className="text-white/50 text-xs">Photobooth 📸</p>}
+            {mission && <p className="text-white/65 text-xs mt-1">Missione {mission.id}: {mission.description}</p>}
           </div>
           <motion.button onClick={downloadSingle}
             className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium"
@@ -158,6 +169,7 @@ export default function GalleryPage() {
   const [refreshing, setRefreshing] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [section, setSection] = useState<GallerySection>('memories');
 
   const loadPhotos = useCallback(async () => {
     setLoading(true);
@@ -181,6 +193,15 @@ export default function GalleryPage() {
     setRefreshing(false);
   };
 
+  const memories = photos.filter(photo => !photo.mission_id);
+  const missions = photos.filter(photo => Boolean(photo.mission_id));
+  const visiblePhotos = section === 'missions' ? missions : memories;
+
+  const selectSection = (nextSection: GallerySection) => {
+    setSection(nextSection);
+    setLightboxIndex(null);
+  };
+
   const downloadAll = async () => {
     if (downloading) return;
     setDownloading(true);
@@ -191,7 +212,7 @@ export default function GalleryPage() {
       const folder = zip.folder('marco-vanessa-matrimonio');
 
       await Promise.all(
-        photos.map(async (photo, i) => {
+        visiblePhotos.map(async (photo, i) => {
           try {
             const res = await fetch(photo.url);
             const blob = await res.blob();
@@ -204,7 +225,9 @@ export default function GalleryPage() {
       const url = URL.createObjectURL(content);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'marco-vanessa-matrimonio.zip';
+      a.download = section === 'missions'
+        ? 'marco-vanessa-missioni.zip'
+        : 'marco-vanessa-ricordi.zip';
       a.click();
       URL.revokeObjectURL(url);
     } catch {
@@ -226,7 +249,7 @@ export default function GalleryPage() {
             Il Nostro Album
           </h1>
           <p className="text-sm mt-1" style={{ color: '#7A6652' }}>
-            {loading ? 'Caricamento...' : `${photos.length} ricordi condivisi`}
+            {loading ? 'Caricamento...' : `${photos.length} ricordi · ${missions.length} missioni completate`}
           </p>
         </motion.div>
         <div className="h-px mt-4 mx-6" style={{ background: 'linear-gradient(to right, transparent, #C9A84C, transparent)' }} />
@@ -240,6 +263,29 @@ export default function GalleryPage() {
           <RefreshCw size={11} className={refreshing ? 'animate-spin' : ''} />
           Aggiorna
         </button>
+      </div>
+
+      {/* Sections */}
+      <div className="px-4 max-w-2xl mx-auto mb-4">
+        <div className="grid grid-cols-2 gap-2 rounded-2xl p-1.5" style={{ background: '#F0EBE1' }}>
+          {([
+            ['memories', 'Ricordi', memories.length],
+            ['missions', 'Missioni', missions.length],
+          ] as const).map(([value, label, count]) => {
+            const active = section === value;
+            return (
+              <button key={value} onClick={() => selectSection(value)}
+                className="py-2.5 rounded-xl text-sm font-semibold transition-all"
+                style={{
+                  background: active ? 'white' : 'transparent',
+                  color: active ? '#3D2B1F' : '#7A6652',
+                  boxShadow: active ? '0 2px 8px rgba(61,43,31,0.08)' : 'none',
+                }}>
+                {label} <span style={{ color: '#C9A84C' }}>({count})</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {/* Grid */}
@@ -267,25 +313,27 @@ export default function GalleryPage() {
               {error}
             </p>
           </motion.div>
-        ) : photos.length === 0 ? (
+        ) : visiblePhotos.length === 0 ? (
           <motion.div className="text-center py-20" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
             <div className="flex justify-center mb-4 opacity-40">
               <RoseWhite size={64} />
             </div>
             <p className="text-xl font-bold mb-2" style={{ fontFamily: 'Playfair Display, serif', color: '#3D2B1F' }}>
-              L'album è ancora vuoto
+              {section === 'missions' ? 'Nessuna missione completata' : 'I ricordi sono ancora vuoti'}
             </p>
             <p className="text-sm" style={{ color: '#7A6652' }}>
-              Sii il primo a condividere un ricordo!
+              {section === 'missions'
+                ? 'Le foto delle sfide appariranno qui.'
+                : 'Condividi una foto per riempire questa sezione!'}
             </p>
           </motion.div>
         ) : (
-          <MasonryGrid photos={photos} onPhotoClick={setLightboxIndex} />
+          <MasonryGrid photos={visiblePhotos} onPhotoClick={setLightboxIndex} />
         )}
       </div>
 
       {/* Download all FAB */}
-      {photos.length > 0 && !loading && (
+      {visiblePhotos.length > 0 && !loading && (
         <div className="fixed bottom-20 left-0 right-0 flex justify-center px-4 pointer-events-none z-40">
           <motion.button
             onClick={downloadAll}
@@ -297,7 +345,7 @@ export default function GalleryPage() {
             {downloading ? (
               <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Preparazione ZIP...</>
             ) : (
-              <><Archive size={16} /> Scarica Tutte ({photos.length})</>
+              <><Archive size={16} /> Scarica {section === 'missions' ? 'Missioni' : 'Ricordi'} ({visiblePhotos.length})</>
             )}
           </motion.button>
         </div>
@@ -307,11 +355,11 @@ export default function GalleryPage() {
       <AnimatePresence>
         {lightboxIndex !== null && (
           <Lightbox
-            photos={photos}
+            photos={visiblePhotos}
             index={lightboxIndex}
             onClose={() => setLightboxIndex(null)}
             onPrev={() => setLightboxIndex(i => Math.max(0, (i ?? 0) - 1))}
-            onNext={() => setLightboxIndex(i => Math.min(photos.length - 1, (i ?? 0) + 1))}
+            onNext={() => setLightboxIndex(i => Math.min(visiblePhotos.length - 1, (i ?? 0) + 1))}
           />
         )}
       </AnimatePresence>

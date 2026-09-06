@@ -62,6 +62,29 @@ export function RoseWhite({ className = '', size = 48 }: { className?: string; s
   );
 }
 
+// A layered rose for the homepage corners; kept separate from RoseWhite so
+// the simpler floral mark can still be used where a lighter decoration fits.
+export function Rose({ className = '', size = 48 }: { className?: string; size?: number }) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 100 100" fill="none">
+      <path d="M42 77 C32 84 20 87 12 83 C18 73 30 70 42 74Z" fill="#9AB48B" opacity="0.8" />
+      <path d="M56 76 C69 84 81 85 89 79 C81 70 68 70 56 73Z" fill="#86A777" opacity="0.78" />
+      <path d="M50 74 C49 82 49 88 45 96" stroke="#7C996E" strokeWidth="3" strokeLinecap="round" />
+      <g stroke="#C9A84C" strokeWidth="1.2">
+        <ellipse cx="50" cy="49" rx="31" ry="22" fill="#F3D98F" transform="rotate(-18 50 49)" />
+        <ellipse cx="50" cy="49" rx="31" ry="22" fill="#F9EBC3" transform="rotate(42 50 49)" />
+        <ellipse cx="50" cy="49" rx="31" ry="22" fill="#EBCB76" transform="rotate(102 50 49)" />
+        <ellipse cx="50" cy="49" rx="31" ry="22" fill="#FFF5D8" transform="rotate(162 50 49)" />
+        <ellipse cx="50" cy="49" rx="24" ry="18" fill="#E5BE5F" transform="rotate(25 50 49)" />
+        <ellipse cx="50" cy="49" rx="21" ry="15" fill="#F8E4A8" transform="rotate(95 50 49)" />
+      </g>
+      <path d="M39 52 C40 39 58 37 62 48 C66 59 51 66 43 59 C35 52 44 44 52 48 C60 52 55 58 49 57"
+        fill="none" stroke="#B89238" strokeWidth="2.6" strokeLinecap="round" />
+      <path d="M40 70 C45 75 55 75 61 69" stroke="#D7B75C" strokeWidth="1.5" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function Gypsophila({ className = '' }: { className?: string }) {
   return (
     <svg className={className} width="120" height="60" viewBox="0 0 120 60" fill="none">
@@ -108,31 +131,124 @@ export function FloatingPetal({ style }: { style?: React.CSSProperties }) {
 
 export function MonogramFrame({ className = '' }: { className?: string }) {
   return (
-    <svg className={className} viewBox="0 0 200 200" fill="none">
-      {/* Cornice esterna ottagonale */}
-      <path d="M100 5 L165 35 L195 100 L165 165 L100 195 L35 165 L5 100 L35 35 Z"
-        stroke="#C9A84C" strokeWidth="1.5" fill="none" opacity="0.6"/>
-      {/* Cornice interna circolare */}
-      <circle cx="100" cy="100" r="75" stroke="#C9A84C" strokeWidth="1" fill="none" opacity="0.4"/>
-      <circle cx="100" cy="100" r="70" stroke="#E8D5A3" strokeWidth="0.5" fill="none" opacity="0.5"/>
-      {/* Ornamenti agli angoli */}
-      {[0, 90, 180, 270].map((angle, i) => (
-        <g key={i} transform={`rotate(${angle} 100 100)`}>
-          <circle cx="100" cy="25" r="3" fill="#C9A84C" opacity="0.7"/>
-          <path d="M95 30 Q100 35 105 30" stroke="#C9A84C" strokeWidth="0.8" fill="none"/>
-        </g>
+    <svg className={className} viewBox="0 0 200 220" fill="none">
+
+      {/* CUORE ESTERNO */}
+      <path
+        d="
+          M100 185
+          C70 160 25 125 25 80
+          C25 45 50 25 78 25
+          C92 25 102 35 100 42
+          C98 35 108 25 122 25
+          C150 25 175 45 175 80
+          C175 125 130 160 100 185
+        "
+        stroke="#C9A84C"
+        strokeWidth="2"
+        fill="none"
+        opacity="0.75"
+      />
+
+      {/* CUORE INTERNO */}
+      <path
+        d="
+          M100 175
+          C74 154 38 122 38 84
+          C38 55 57 38 80 38
+          C92 38 100 45 100 52
+          C100 45 108 38 120 38
+          C143 38 162 55 162 84
+          C162 122 126 154 100 175
+        "
+        stroke="#E8D5A3"
+        strokeWidth="1"
+        fill="none"
+        opacity="0.8"
+      />
+
+      {/* PERLINE DECORATIVE */}
+      {[
+        [100, 18],
+        [55, 38],
+        [145, 38],
+        [30, 90],
+        [170, 90],
+        [60, 155],
+        [140, 155],
+        [100, 188],
+      ].map(([x, y], i) => (
+        <circle
+          key={i}
+          cx={x}
+          cy={y}
+          r="2.5"
+          fill="#C9A84C"
+          opacity="0.75"
+        />
       ))}
-      {/* Piccoli diamanti decorativi */}
-      {[45, 135, 225, 315].map((angle, i) => {
-        const rad = (angle * Math.PI) / 180;
-        const x = 100 + 78 * Math.cos(rad);
-        const y = 100 + 78 * Math.sin(rad);
-        return (
-          <path key={i}
-            d={`M${x} ${y-4} L${x+3} ${y} L${x} ${y+4} L${x-3} ${y} Z`}
-            fill="#C9A84C" opacity="0.6"/>
-        );
-      })}
+
+      {/* FIORE SINISTRO */}
+      <g transform="translate(58 55)">
+        <circle cx="0" cy="0" r="3" fill="#C9A84C" opacity="0.8" />
+        <ellipse cx="0" cy="-6" rx="3" ry="5" fill="white" />
+        <ellipse cx="5" cy="-2" rx="3" ry="5" fill="white" transform="rotate(60 5 -2)" />
+        <ellipse cx="5" cy="4" rx="3" ry="5" fill="white" transform="rotate(120 5 4)" />
+        <ellipse cx="0" cy="6" rx="3" ry="5" fill="white" />
+        <ellipse cx="-5" cy="4" rx="3" ry="5" fill="white" transform="rotate(60 -5 4)" />
+        <ellipse cx="-5" cy="-2" rx="3" ry="5" fill="white" transform="rotate(120 -5 -2)" />
+      </g>
+
+      {/* FIORE DESTRO */}
+      <g transform="translate(142 55)">
+        <circle cx="0" cy="0" r="3" fill="#C9A84C" opacity="0.8" />
+        <ellipse cx="0" cy="-6" rx="3" ry="5" fill="white" />
+        <ellipse cx="5" cy="-2" rx="3" ry="5" fill="white" transform="rotate(60 5 -2)" />
+        <ellipse cx="5" cy="4" rx="3" ry="5" fill="white" transform="rotate(120 5 4)" />
+        <ellipse cx="0" cy="6" rx="3" ry="5" fill="white" />
+        <ellipse cx="-5" cy="4" rx="3" ry="5" fill="white" transform="rotate(60 -5 4)" />
+        <ellipse cx="-5" cy="-2" rx="3" ry="5" fill="white" transform="rotate(120 -5 -2)" />
+      </g>
+
+      {/* CERCHIO MONOGRAMMA */}
+      <circle
+        cx="100"
+        cy="102"
+        r="48"
+        stroke="#C9A84C"
+        strokeWidth="1"
+        opacity="0.5"
+      />
+
+      <circle
+        cx="100"
+        cy="102"
+        r="43"
+        stroke="#E8D5A3"
+        strokeWidth="0.8"
+        opacity="0.6"
+      />
+
+      {/* ORNAMENTI SOPRA E SOTTO */}
+      <path
+        d="M92 50 Q100 58 108 50"
+        stroke="#C9A84C"
+        strokeWidth="1"
+        fill="none"
+        opacity="0.8"
+      />
+
+      <path
+        d="M92 154 Q100 146 108 154"
+        stroke="#C9A84C"
+        strokeWidth="1"
+        fill="none"
+        opacity="0.8"
+      />
+
+      <circle cx="100" cy="48" r="2.5" fill="#C9A84C" opacity="0.8" />
+      <circle cx="100" cy="156" r="2.5" fill="#C9A84C" opacity="0.8" />
+
     </svg>
   );
 }

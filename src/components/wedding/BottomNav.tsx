@@ -1,11 +1,12 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Camera, Images, Upload } from 'lucide-react';
+import { Home, Camera, Images, Upload, ClipboardCheck } from 'lucide-react';
 
 const navItems = [
   { path: '/', icon: Home, label: 'Home' },
   { path: '/photobooth', icon: Camera, label: 'Photobooth' },
   { path: '/gallery', icon: Images, label: 'Galleria' },
   { path: '/upload', icon: Upload, label: 'Carica' },
+  { path: '/mission', icon: ClipboardCheck, label: 'Missioni' },
 ];
 
 export default function BottomNav() {

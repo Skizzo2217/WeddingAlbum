@@ -11,6 +11,7 @@ export interface Photo {
   uploader_name?: string;
   created_at: string;
   is_photobooth: boolean;
+  mission_id?: number;
   path: string;
 }
 
@@ -19,6 +20,7 @@ export interface UploadPhotoInput {
   uploaderName?: string;
   isPhotobooth?: boolean;
   originalName?: string;
+  missionId?: number;
 }
 
 interface PhotoRow {
@@ -27,6 +29,7 @@ interface PhotoRow {
   uploader_name?: string | null;
   created_at?: string | null;
   approved?: boolean | null;
+  mission_id?: number | null;
 }
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
@@ -125,13 +128,13 @@ export async function uploadWeddingPhoto(input: UploadPhotoInput): Promise<Photo
   if (error) throw error;
 
   const publicUrl = publicPhotoUrl(path);
-  const { error: insertError } = await supabase.from('photos').insert([
-    {
-      image_url: publicUrl,
-      uploader_name: uploaderName ?? '',
-      approved: true,
-    },
-  ]);
+  const photoRow = {
+    image_url: publicUrl,
+    uploader_name: uploaderName ?? '',
+    approved: true,
+    ...(input.missionId ? { mission_id: input.missionId } : {}),
+  };
+  const { error: insertError } = await supabase.from('photos').insert([photoRow]);
 
   if (insertError) throw insertError;
 
@@ -143,14 +146,28 @@ export async function uploadWeddingPhoto(input: UploadPhotoInput): Promise<Photo
     uploader_name: uploaderName,
     created_at: new Date().toISOString(),
     is_photobooth: Boolean(input.isPhotobooth),
+    mission_id: input.missionId,
   };
 }
 
 export async function listWeddingPhotos(): Promise<Photo[]> {
-  const { data, error } = await supabase
+  const primaryResult = await supabase
     .from('photos')
-    .select('id,image_url,uploader_name,created_at,approved')
+    .select('id,image_url,uploader_name,created_at,approved,mission_id')
     .order('created_at', { ascending: false });
+  let data = primaryResult.data as PhotoRow[] | null;
+  let error = primaryResult.error;
+
+  // Allows the existing gallery to keep working until the one-time SQL
+  // migration that adds mission_id has been executed.
+  if (error && error.message.includes('mission_id')) {
+    const fallbackResult = await supabase
+      .from('photos')
+      .select('id,image_url,uploader_name,created_at,approved')
+      .order('created_at', { ascending: false });
+    data = fallbackResult.data as PhotoRow[] | null;
+    error = fallbackResult.error;
+  }
 
   if (error) throw error;
 
@@ -165,6 +182,7 @@ export async function listWeddingPhotos(): Promise<Photo[]> {
         uploader_name: row.uploader_name || undefined,
         created_at: row.created_at ?? new Date().toISOString(),
         is_photobooth: false,
+        mission_id: row.mission_id ?? undefined,
       };
     });
 }

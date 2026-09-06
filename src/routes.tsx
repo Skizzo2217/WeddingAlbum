@@ -8,6 +8,7 @@ const NotFoundPage = ProdNotFoundPage;
 const PhotoboothPage = lazy(() => import('./pages/photobooth'));
 const GalleryPage = lazy(() => import('./pages/gallery'));
 const UploadPage = lazy(() => import('./pages/upload'));
+const MissionPage = lazy(() => import('./pages/mission'));
 
 export const routes: RouteObject[] = [
   {
@@ -27,10 +28,14 @@ export const routes: RouteObject[] = [
     element: <UploadPage />,
   },
   {
+    path: '/mission',
+    element: <MissionPage />,
+  },
+  {
     path: '*',
     element: <NotFoundPage />,
   },
 ];
 
-export type Path = '/' | '/photobooth' | '/gallery' | '/upload';
+export type Path = '/' | '/photobooth' | '/gallery' | '/upload' | '/mission';
 export type Params = Record<string, string | undefined>;
