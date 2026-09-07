@@ -17,15 +17,13 @@
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "baseUrl": ".",
     "paths": {
       "@/api/*": ["./src/server/api/*"],
       "@/layouts/*": ["./src/layout/*"],
       "@/*": ["./src/*"],
       "~/*": ["./src/*"]
     },
-
-    "ignoreDeprecations": "6.0"
+    "baseUrl": "."
   },
   "include": ["src", "vite.config.ts", "plugins"]
 }
