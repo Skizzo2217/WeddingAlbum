@@ -5,6 +5,18 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from './App';
 import './styles/global.css';
 
+// After a deploy, a browser tab can still reference an old lazy-loaded chunk
+// whose hashed filename has been replaced. Vite emits this event before React
+// Router shows its generic error screen; one refresh loads the current manifest.
+const assetRefreshKey = 'wedding-album:asset-refresh';
+window.addEventListener('vite:preloadError', (event) => {
+  event.preventDefault();
+  if (!sessionStorage.getItem(assetRefreshKey)) {
+    sessionStorage.setItem(assetRefreshKey, '1');
+    window.location.reload();
+  }
+});
+
 if (import.meta.env.MODE === 'development') {
   const meta = document.createElement('meta');
   meta.name = 'robots';

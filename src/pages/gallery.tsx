@@ -213,7 +213,7 @@ export default function GalleryPage() {
             Il Nostro Album
           </h1>
           <p className="text-sm mt-1" style={{ color: '#7A6652' }}>
-            {loading ? 'Caricamento...' : `${photos.length} ricordi · ${missions.length} missioni completate`}
+            {loading ? 'Caricamento...' : `${memories.length} ricordi · ${missions.length} missioni completate`}
           </p>
         </motion.div>
         <div className="h-px mt-4 mx-6" style={{ background: 'linear-gradient(to right, transparent, #C9A84C, transparent)' }} />
